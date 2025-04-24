@@ -1,0 +1,485 @@
+
+.base 0x4400
+
+.define XLEFT 28
+.define XINPUT 29
+.define XRIGHT 51
+.define XRESULT 53
+.define INPUTSIZE 22
+.define FLAGSIZE $flagsize
+
+.define KEY1 $key1
+.define KEY2 $key2
+
+start:
+	# Reset code register
+	mov rCode, 0
+
+	# Initialize display buffer pointer
+	mov rText, 0x50
+
+	# Reserve memory for different purposes
+	#  64 KB for local variables
+	#  Remaining memory for call stack
+	mov v0, rParam
+	add v0, 0x10000
+	mov rCall, v0
+	
+	# Switch to user mode
+	mode 1
+	
+	jmp main
+
+
+# v0 = char
+# v4 = x
+# v8 = y
+# v12 = color
+render_char:
+	shl v4, 1
+	mul v8, 0xA0
+	add v8, v4
+	shl v12, 8
+	movb v12, v0
+	movh [rText+v8], v12
+return:
+	ret
+
+# v0 = string ptr
+# v4 = x
+# v8 = y
+# v12 = color
+render_string:
+	movb v16, [v0]
+	cmpb v16, 0
+	jeq return
+	
+	mov v20, v4
+	mov v24, v8
+	mov v28, v12
+	call render_char, 16
+	
+	add v0, 1
+	add v4, 1
+	jmp render_string
+
+flip_display:
+	mov v0, 0x40
+	mov v4, [v0]
+	or v4, 0x20000000
+	mov [v0], v4
+	ret
+
+draw_info:
+	mov v0, flag_checker_str
+	mov v4, XLEFT
+	mov v8, 9
+	mov v12, 0x0F
+	call render_string
+	
+	mov v0, press_enter_str
+	mov v4, XLEFT
+	mov v8, 15
+	mov v12, 0x0F
+	call render_string
+	
+	jmp flip_display
+
+draw_input_box:
+	mov v0, input_box_top_str
+	mov v4, XLEFT
+	mov v8, 11
+	mov v12, color
+	mov v12, [v12]
+	call render_string
+	
+	mov v0, input_box_bottom_str
+	mov v4, XLEFT
+	mov v8, 13
+	mov v12, color
+	mov v12, [v12]
+	call render_string
+	
+	mov v0, 0xB3
+	mov v4, XLEFT
+	mov v8, 12
+	mov v12, color
+	mov v12, [v12]
+	call render_char
+	
+	mov v0, 0xB3
+	mov v4, XRIGHT
+	mov v8, 12
+	mov v12, color
+	mov v12, [v12]
+	call render_char
+	
+	mov v0, input
+	mov v4, XINPUT
+	mov v8, 12
+	mov v12, color
+	mov v12, [v12]
+	call render_string
+	
+	mov v0, inputsize
+	cmp [v0], INPUTSIZE
+	jeq draw_input_after_chars
+	mov v4, XINPUT
+	add v4, [v0]
+	mov v0, 0x20
+	mov v8, 12
+	mov v12, color
+	mov v12, [v12]
+	call render_char
+
+draw_input_after_chars:
+	mov v0, result
+	mov v0, [v0]
+	mov v4, XRESULT
+	mov v8, 12
+	mov v12, color
+	mov v12, [v12]
+	call render_char
+	
+	jmp flip_display
+
+initialize:
+	mov v0, color
+	mov [v0], 0x0F
+	mov v0, result
+	mov [v0], 0x20
+	
+	mov v0, 0x46
+	movh [v0], 12
+	ret
+
+is_valid_flag:
+	mov v0, inputsize
+	cmp [v0], FLAGSIZE
+	jne invalid_flag
+	
+	mov v0, input
+	mov v4, modified_input
+	
+	movx v8, [v0]
+	xorx v8, KEY1
+	movx [v4], v8
+	
+	add v0, 16
+	add v4, 16
+	movq v8, [v0]
+	xorq v8, KEY2
+	movq [v4], v8
+	
+	mov v0, modified_input
+	mov v4, takuzu_grid # puzzle input
+	mov v8, takuzu_work # puzzle output
+	xor v12, v12 # input bit / puzzle bit / current input byte / current puzzle byte
+	movb v14, [v0] # current input byte
+	movb v15, [v4] # current puzzle byte
+fill_grid_loop:
+	movb v16, v15 # temporary var (current puzzle byte)
+	andb v16, 3 # is it an empty square?
+	cmpb v16, 2
+	jne fill_grid_update
+	
+	# It's an empty square
+	# Read the next input bit
+	movb v16, v14
+	shrb v14, 1
+	addb v12, 1
+	cmpb v12, 7 # Check if we need to read the next input byte
+	jne fill_grid_update
+	
+	# Read the next input byte
+	add v0, 1
+	movb v14, [v0]
+	movb v12, 0
+
+fill_grid_update:
+	# Update current output byte
+	andb v16, 1
+	movb [v8], v16
+	add v8, 1
+	cmp v8, takuzu_work_end
+	jeq check_binary_puzzle
+	
+	# Shift current puzzle byte
+	shrb v15, 2
+	
+	# Check if we need to read the next puzzle byte
+	addb v13, 1
+	cmpb v13, 4
+	jne fill_grid_loop
+	
+	# Read the next puzzle byte
+	add v4, 1
+	movb v15, [v4]
+	movb v13, 0
+	jmp fill_grid_loop
+
+check_binary_puzzle:
+	# Check rows
+	mov v4, 1
+	mov v8, 14
+	call check_puzzle_rows, 4
+	mov v0, v4
+	
+	mov v4, 1
+	mov v8, 14
+	call check_distinct_rows, 4
+	and v0, v4
+	
+	# Check columns
+	mov v4, 14
+	mov v8, 1
+	call check_puzzle_rows, 4
+	and v0, v4
+	
+	mov v4, 14
+	mov v8, 1
+	call check_distinct_rows, 4
+	and v0, v4
+	
+	ret
+
+# v0 = inner step
+# v4 = outer step
+check_distinct_rows:
+	xor v8, v8 # number of rows processed
+	mov v12, takuzu_work # current row pointer
+	mov v16, takuzu_row_values # current value pointer
+
+calculate_row_value:
+	mov v20, v12 # current cell pointer
+	xor v24, v24 # current value
+	xor v28, v28 # number of cells processed
+calculate_row_value_loop:
+	shl v24, 1
+	orb v24, [v20]
+	add v20, v0
+	add v28, 1
+	cmp v28, 14
+	jne calculate_row_value_loop
+
+check_row_value:
+	mov v20, takuzu_row_values
+check_row_value_loop:
+	cmp v20, v16
+	jeq check_row_ok
+	movh v28, [v20]
+	cmph v28, v24
+	jeq invalid_flag
+	add v20, 2
+	jmp check_row_value_loop
+
+check_row_ok:
+	movh [v16], v24
+	add v16, 2
+	add v12, v4
+	addb v8, 1
+	cmpb v8, 14
+	jne calculate_row_value
+	
+	mov v0, 1
+	ret
+
+
+# v0 = inner step
+# v4 = outer step
+check_puzzle_rows:
+	xor v8, v8 # number of rows processed
+	mov v12, takuzu_work # current row pointer
+
+check_puzzle_row:
+	mov v16, v12 # current cell pointer
+	mov v20, 0xFF000000 # number of bits / number of zeros / number of equal bits / previous bit
+	# v24 = current bit
+
+check_puzzle_cell:
+	# Read the next bit
+	movb v24, [v16] # read current bit
+	add v16, v0 # advance current cell pointer to next cell
+	
+	# Check for bit streaks
+	cmpb v23, v24
+	jeq check_puzzle_inc_streak
+	movb v22, 0
+	movb v23, v24
+check_puzzle_inc_streak:
+	addb v22, 1
+	cmpb v22, 3
+	jeq invalid_flag
+	
+	# Count the zero bits
+	cmpb v24, 0
+	jne check_puzzle_after_inc
+	addb v21, 1
+
+check_puzzle_after_inc:
+	# Check if we reached the end of the row
+	addb v20, 1
+	cmpb v20, 14
+	jne check_puzzle_cell
+	
+	# Check the number of zero bits
+	cmpb v21, 7
+	jne invalid_flag
+	
+	# Move to the next row
+	add v12, v4 # advance current row pointer
+	addb v8, 1
+	cmpb v8, 14
+	jne check_puzzle_row
+
+valid_flag:
+	mov v0, 1
+	ret
+
+invalid_flag:
+	xor v0, v0
+	ret
+
+verify_flag:
+	call is_valid_flag
+	cmp v0, 0
+	jeq verify_flag_invalid
+verify_flag_valid:
+	mov v0, color
+	mov [v0], 2
+	mov v0, result
+	mov [v0], 2
+	ret
+verify_flag_invalid:
+	mov v0, color
+	mov [v0], 12
+	mov v0, result
+	mov [v0], 1
+	ret
+
+reset_result:
+	mov v0, color
+	mov [v0], 0x0F
+	mov v0, result
+	mov [v0], 0x20
+	ret
+
+process_input:
+	xor v0, v0
+process_input_wait:
+	mov v4, [v0]
+	and v4, 0x50
+	cmp v4, 0
+	jne process_input_received
+	wait 1
+	jmp process_input_wait
+process_input_received:
+	mov [v0], v0
+	mov v8, v4
+	and v8, 0x10
+	cmp v8, 0
+	jeq check_char_typed
+process_key_down:
+	mov v0, 12
+	mov v0, [v0]
+	cmp v0, 8
+	jeq process_backspace
+	cmp v0, 13
+	jeq verify_flag
+check_char_typed:
+	and v4, 0x40
+	cmp v4, 0
+	jne process_char_typed
+	ret
+process_backspace:
+	mov v0, inputsize
+	cmp [v0], 0
+	jeq return
+	sub [v0], 1
+	mov v4, input
+	add v4, [v0]
+	movb [v4], 0
+	call reset_result
+	ret
+process_char_typed:
+	mov v0, 16
+	mov v0, [v0]
+	cmp v0, 33
+	jlt return
+	cmp v0, 126
+	jgt return
+	mov v4, inputsize
+	cmp [v4], INPUTSIZE
+	jge return
+	mov v8, input
+	add v8, [v4]
+	movb [v8], v0
+	add [v4], 1
+	call reset_result
+	ret
+
+update_cursor:
+	mov v0, inputsize
+	mov v0, [v0]
+	cmp v0, INPUTSIZE
+	jeq disable_cursor
+	mov v4, 0x40
+	mov v8, [v4]
+	or v8, 0x8000000
+	mov [v4], v8
+	mov v4, 0x44
+	add v0, XINPUT
+	movh [v4], v0
+	ret
+disable_cursor:
+	mov v0, 0x40
+	mov v4, [v0]
+	and v4, 0xF7FFFFFF
+	mov [v0], v4
+	ret
+
+main:
+	call initialize
+	call draw_info
+main_loop:
+	call update_cursor
+	call draw_input_box
+	call process_input
+	jmp main_loop
+
+color:
+	.space 4
+
+result:
+	.space 4
+
+inputsize:
+	.space 4
+
+input:
+	.space 24
+
+modified_input:
+	.space 24
+
+flag_checker_str:
+	.string "Flag checker:"
+
+input_box_top_str:
+	.string "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF"
+
+input_box_bottom_str:
+	.string "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9"
+
+press_enter_str:
+	.string "Press enter to verify."
+
+takuzu_grid:
+	.hex "$puzzle"
+	
+takuzu_work:
+	.space 196
+
+takuzu_work_end:
+takuzu_row_values:
+	.space 28
