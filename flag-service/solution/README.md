@@ -5,12 +5,12 @@ The flaws in the challenge are:
 
 The basic idea behind the attack is as follows:
 1. Register an account with a known password
-2. Request a number of tickets for that account, decrypt the responses, and extract the nonces from the tickets
+2. Request multiple tickets for that account, decrypt the responses, and extract the nonces from the tickets
 3. Use the nonces from step 2 to recover the RNG state
 4. Request a ticket for Administrator for a service with a known password
 5. Because the password of the service is known, and the nonce can be predicted, the content of the ticket can be predicted
 6. Apply an XOR between the predicted ticket and the response from the server to recover the RC4 keystream of the Administrator account
-7. Request a ticket for Administrator for the Flag service
+7. Request a ticket for Administrator for the Flag Service
 8. Decrypt the response using the keystream from step 6
 9. The ticket of step 8 can be used to retrieve the flag
 
