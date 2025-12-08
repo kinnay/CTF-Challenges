@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  ctc2025-dojo-dojo:
+    build: dojo
+    environment:
+      FLAG: CTF{testflag}
+
+  ctc2025-dojo-gate:
+    build: gate
+  
+  ctc2025-dojo-proxy:
+    image: caddy:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile

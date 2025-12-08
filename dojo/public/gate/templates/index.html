@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Manager</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Tell me your name</h1>
+        <form method="post">
+            <input type="text" name="name" placeholder="Name" required>
+            <input type="hidden" name="redirect_uri" value="{{redirect_uri}}">
+            <button type="submit">Enter Dojo</button>
+        </form>
+    </div>
+</body>
+</html>

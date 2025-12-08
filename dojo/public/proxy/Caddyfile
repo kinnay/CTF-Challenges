@@ -1,0 +1,29 @@
+{
+	admin off
+}
+
+:80 {
+    # Custom error handling
+    handle_errors {
+        respond "Proxy error, try refreshing." 500
+    }
+
+    # Route for the gate service
+    handle /gate/* {
+        uri strip_prefix /gate
+        reverse_proxy ctc2025-dojo-gate:8000 {
+            transport http {
+                dial_timeout 5s
+            }
+        }
+    }
+
+    # Default route for the dojo service
+    handle {
+        reverse_proxy ctc2025-dojo-dojo:3000 {
+            transport http {
+                dial_timeout 5s
+            }
+        }
+    }
+}
