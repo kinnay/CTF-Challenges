@@ -1,0 +1,3 @@
+
+Convert ogx to ogg:
+	ffmpeg -i <input> -acodec libvorbis (-t time) <output>

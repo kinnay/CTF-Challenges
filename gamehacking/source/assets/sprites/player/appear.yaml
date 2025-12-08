@@ -1,0 +1,3 @@
+
+spritesheet: player/appear
+timings: [0, 3, 6, 9, 12, 15, 18]

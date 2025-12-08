@@ -1,0 +1,6 @@
+
+services:
+  ctc2025-gamehacking-container:
+    build: container
+    ports:
+      - 80:80
