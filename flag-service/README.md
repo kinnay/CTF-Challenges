@@ -6,3 +6,5 @@
 Kerberos is a widely used authentication protocol, especially in corporate networks. While theoretically secure, many weaknesses have been found in its implementations.
 
 This challenge implements a simple authentication protocol that is inspired by Kerberos. Good luck breaking it!
+
+*(this challenge was made for CSCG 2025, the German qualifiers for the European Cyber Security Challenge)*

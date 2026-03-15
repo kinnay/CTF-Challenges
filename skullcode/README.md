@@ -8,3 +8,5 @@
 The flag is the solution surrounded by `dach2025{...}`.
 
 **Note:** the challenge can be solved locally (spawning a session is not required).
+
+*(this challenge was made for CSCG 2025, the German qualifiers for the European Cyber Security Challenge)*

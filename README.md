@@ -2,8 +2,8 @@
 This repository contains some of the challenges that I have made for past CTFs. It currently includes challenges from the following CTFs:
 
 * [Cyber Security Challenge Germany (CSCG)](https://cscg.live)
-* [Challenge the Cyber](https://challengethecyber.nl)
-* [Team Europe Qualifiers for ICC](https://icc.ecsc.eu/)
+* [Challenge the Cyber (CTC)](https://challengethecyber.nl)
+* [Team Europe Qualifiers for ICC (TEC)](https://icc.ecsc.eu/)
 
 The challenge folders can contain the following folders:
 
