@@ -3,6 +3,7 @@ This repository contains some of the challenges that I have made for past CTFs. 
 
 * [Cyber Security Challenge Germany (CSCG)](https://cscg.live)
 * [Challenge the Cyber](https://challengethecyber.nl)
+* [Team Europe Qualifiers for ICC](https://icc.ecsc.eu/)
 
 The challenge folders can contain the following folders:
 
@@ -19,3 +20,4 @@ The following challenges are currently in this repository:
 | CSCG | 2025 | Reversing | [Skullcode](skullcode) |
 | CTC | 2025 | Web | [Dojo](dojo) |
 | CTC | 2025 | Web | [Game Hacking](gamehacking) |
+| TEC | 2026 | Reversing | [Zen of Cython](zen-of-cython) |
