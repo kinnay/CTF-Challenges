@@ -1,6 +1,5 @@
 * **Name:** Game Hacking
 * **Category:** Web
-* **Difficulty:** Medium
 * **CTF:** CTC 2025
 
 Test your game hacking skills in this challenge! Move through walls, fly through the air, or be creative. Can you obtain the trophy?
