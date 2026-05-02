@@ -1,0 +1,2 @@
+
+This directory contains the README that is given to the players. It can be converted to PDF with mdpdf.

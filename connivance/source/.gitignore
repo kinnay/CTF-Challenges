@@ -1,0 +1,11 @@
+
+build/
+obf/
+*.pyc
+chal/main
+chal/*.tfl
+chal/romfs/blob
+chal/romfs/blob.sig
+chal/romfs/damocles.bin
+chal/romfs/dragonfly.bin
+chal/romfs/map

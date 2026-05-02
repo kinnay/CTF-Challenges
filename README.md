@@ -18,6 +18,9 @@ The following challenges are currently in this repository:
 | --- | --- | --- | --- |
 | CSCG | 2025 | Crypto | [Flag Service](flag-service) |
 | CSCG | 2025 | Reversing | [Skullcode](skullcode) |
+| CSCG | 2026 | Reversing | [Connivance](connivance) |
+| CSCG | 2026 | Reversing | [Cafe Latte](cafe-latte) |
+| CSCG | 2026 | Forensics | [Slippery Slope](slippery-slope) |
 | CTC | 2025 | Web | [Dojo](dojo) |
 | CTC | 2025 | Web | [Game Hacking](gamehacking) |
 | TEC | 2026 | Reversing | [Zen of Cython](zen-of-cython) |
