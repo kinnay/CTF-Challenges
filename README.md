@@ -4,6 +4,7 @@ This repository contains some of the challenges that I have made for past CTFs. 
 * [Cyber Security Challenge Germany (CSCG)](https://cscg.live)
 * [Challenge the Cyber (CTC)](https://challengethecyber.nl)
 * [Team Europe Qualifiers for ICC (TEC)](https://icc.ecsc.eu/)
+* [European Cyber Security Challenge (ECSC)](https://ecsc2026.de)
 
 The challenge folders can contain the following folders:
 
@@ -23,4 +24,6 @@ The following challenges are currently in this repository:
 | CSCG | 2026 | Forensics | [Slippery Slope](slippery-slope) |
 | CTC | 2025 | Web | [Dojo](dojo) |
 | CTC | 2025 | Web | [Game Hacking](gamehacking) |
+| ECSC | 2026 | Reversing + Misc | [Trust Issues](https://github.com/ECSC2026/jeopardy-challenges/blob/main/trust-issues) |
+| ECSC | 2026 | Reversing | [Simon Says](https://github.com/ECSC2026/jeopardy-challenges/blob/main/simon-says) |
 | TEC | 2026 | Reversing | [Zen of Cython](zen-of-cython) |
